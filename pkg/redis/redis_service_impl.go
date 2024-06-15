@@ -12,6 +12,17 @@ type RedisServiceImpl struct {
 	RedisClient *redis.Client
 }
 
+func NewRedisServiceImpl(addr string, password string, db int) *RedisServiceImpl {
+	client := redis.NewClient(&redis.Options{
+		Addr:     addr,     // Redis server address
+		Password: password, // No password set
+		DB:       db,       // Use default DB
+	})
+	return &RedisServiceImpl{
+		RedisClient: client,
+	}
+}
+
 func (service *RedisServiceImpl) Set(key string, value interface{}, expiration time.Duration) error {
 	err := service.RedisClient.Set(ctx, key, value, expiration).Err()
 	return err

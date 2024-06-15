@@ -1,10 +1,13 @@
 package shorted_link
 
-import "shortlink-system/pkg/entities"
+import (
+	"shortlink-system/pkg/auth"
+	"shortlink-system/pkg/entities"
+)
 
 type ShortLinkService interface {
-	Handler(params *CreateShortedLink, user entities.User) entities.ShortedLink
-	GetExistShortLink(linkOriginal string) (string, error)
-	GetExistOriginalLink(linkOriginal string) (string, error)
+	CreateShortedLink(params *CreateShortedLink, user auth.UserLoggedPayload) entities.ShortedLink
+	GetExistOriginalLink(generatedLink string) (string, error)
 	SaveToRedis(link entities.ShortedLink)
+	UpdateAccessed(link string) entities.ShortedLink
 }

@@ -2,10 +2,16 @@ package shorted_link
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"shortlink-system/pkg/entities"
+	"time"
 )
 
 type ShortedLinkRepositoryImpl struct {
+}
+
+func NewShortedLinkRepository() *ShortedLinkRepositoryImpl {
+	return &ShortedLinkRepositoryImpl{}
 }
 
 func (repository *ShortedLinkRepositoryImpl) Create(db *gorm.DB, req entities.ShortedLink) entities.ShortedLink {
@@ -21,4 +27,28 @@ func (repository *ShortedLinkRepositoryImpl) FindByShortedLink(db *gorm.DB, gene
 	shortedLink := entities.ShortedLink{}
 	result := db.Where("link_shorted = ?", generateLink).First(&shortedLink)
 	return shortedLink, result.Error
+}
+
+func (repository *ShortedLinkRepositoryImpl) SumMonthlyUser(db *gorm.DB, id int) int {
+	now := time.Now()
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	nextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+	lastOfMonth := nextMonth.Add(-time.Second)
+	var count int64
+	db.Clauses(clause.Locking{Strength: clause.LockingStrengthUpdate}).
+		Model(&entities.ShortedLink{}).
+		Where("user_id = ? and created_at >= ? and updated_at <= ?", id, firstOfMonth, lastOfMonth).
+		Count(&count)
+	return int(count)
+}
+
+func (repository *ShortedLinkRepositoryImpl) FindByShortedLinkWithLock(db *gorm.DB, link string) (entities.ShortedLink, error) {
+	shortedLink := entities.ShortedLink{}
+	result := db.Where("link_shorted = ?", link).First(&shortedLink)
+	return shortedLink, result.Error
+}
+
+func (repository *ShortedLinkRepositoryImpl) Update(db *gorm.DB, req entities.ShortedLink) entities.ShortedLink {
+	db.Save(&req)
+	return req
 }
