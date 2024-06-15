@@ -3,29 +3,23 @@ package exception
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"shortlink-system/pkg/languages"
+	"strings"
 )
 
-type ErrorResponse struct {
-	Error       bool        `json:"error"`
-	FailedField string      `json:"failedField"`
-	Tag         string      `json:"tag"`
-	Value       interface{} `json:"value"`
-	Message     string      `json:"message"`
+var ROLES = fiber.Map{
+	"required": languages.REQUIRED,
+	"gte":      languages.MIN,
+	"email":    languages.EMAIL_INVALID,
 }
 
-func CustomErrorValidator(errs validator.ValidationErrors) []ErrorResponse {
-	validationErrors := []ErrorResponse{}
+func CustomErrorValidator(errs validator.ValidationErrors) []string {
+	validationErrors := []string{}
 	if errs != nil {
 		for _, err := range errs {
-			var elem ErrorResponse
-
-			elem.FailedField = err.Field()
-			elem.Tag = err.Tag()
-			elem.Value = err.Value()
-			elem.Error = true
-			elem.Message = fmt.Sprintf("%s is %s", elem.FailedField, elem.Tag)
-
-			validationErrors = append(validationErrors, elem)
+			message := fmt.Sprintf("%s_%s", strings.ToUpper(err.Field()), ROLES[err.ActualTag()])
+			validationErrors = append(validationErrors, message)
 		}
 	}
 

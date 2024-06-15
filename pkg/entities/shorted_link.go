@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type ShortedLink struct {
 	gorm.Model
-	UserID       int
+	UserID       uint
 	User         User
 	LinkOriginal string `gorm:"varchar:256" json:"link_original"`
 	LinkShorted  string `gorm:"varchar:256" json:"link_shorted"`

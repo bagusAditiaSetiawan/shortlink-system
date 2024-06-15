@@ -8,6 +8,7 @@ import (
 	"os"
 	"shortlink-system/pkg/entities"
 	"shortlink-system/pkg/helper"
+	"time"
 )
 
 func InitializedDatabase() *gorm.DB {
@@ -27,6 +28,16 @@ func InitializedDatabase() *gorm.DB {
 	}), &gorm.Config{})
 	helper.IfErrorHandler(err)
 	log.Info("Connected to database")
+
+	dbSql, err := db.DB()
+	helper.IfErrorHandler(err)
+
+	dbSql.SetMaxIdleConns(10)
+	dbSql.SetMaxOpenConns(100)
+	dbSql.SetConnMaxLifetime(time.Hour)
+
 	db.AutoMigrate(&entities.User{})
+	db.AutoMigrate(&entities.ShortedLink{})
+
 	return db
 }

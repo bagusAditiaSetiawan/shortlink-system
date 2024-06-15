@@ -17,19 +17,21 @@ type ServiceImpl struct {
 	PasswordService password.Service
 }
 
-func NewServiceImpl(db *gorm.DB, validate *validator.Validate, userRepository UserRepository) *ServiceImpl {
+func NewServiceImpl(db *gorm.DB, validate *validator.Validate, userRepository UserRepository, passwordService password.Service) *ServiceImpl {
 	return &ServiceImpl{
-		DB:             db,
-		UserRepository: userRepository,
-		Validator:      validate,
+		DB:              db,
+		UserRepository:  userRepository,
+		Validator:       validate,
+		PasswordService: passwordService,
 	}
 }
 
 func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
+	err := service.Validator.Struct(req)
+	helper.IfErrorHandler(err)
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
-
-	_, err := service.UserRepository.GetExisted(tx, req.Email, req.Username)
+	_, err = service.UserRepository.GetExisted(tx, req.Email, req.Username)
 	if err == nil {
 		panic(exception.NewBadRequestException(languages.USER_EXIST))
 	}
@@ -45,12 +47,22 @@ func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
 	user, err = service.UserRepository.Create(tx, user)
 
 	helper.IfErrorHandler(err)
-
 	return SignUpSignature{
 		Username: user.Username,
 	}
 }
 
-func (service *ServiceImpl) SignIn(req *SignInRequest) SignInResponse {
-	panic("implement me")
+func (service *ServiceImpl) SignIn(req *SignInRequest) entities.User {
+	err := service.Validator.Struct(req)
+	helper.IfErrorHandler(err)
+	tx := service.DB.Begin()
+	defer helper.RollbackOrCommitDb(tx)
+	user, err := service.UserRepository.GetExisted(tx, "", req.Username)
+	if err != nil {
+		panic(exception.NewNotFoundHandler(languages.USER_NOT_FOUND))
+	}
+	if matched := service.PasswordService.CompareHashAndPassword(user.Password, req.Password); matched != nil {
+		panic(exception.NewBadRequestException(languages.PASSWORD_WRONG))
+	}
+	return user
 }

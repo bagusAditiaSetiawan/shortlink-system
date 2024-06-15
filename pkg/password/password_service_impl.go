@@ -4,8 +4,12 @@ import "golang.org/x/crypto/bcrypt"
 
 type PasswordServiceImpl struct{}
 
+func NewPasswordService() *PasswordServiceImpl {
+	return &PasswordServiceImpl{}
+}
+
 func (s *PasswordServiceImpl) Hashing(password string) (string, error) {
-	hashedByte, err := bcrypt.Cost([]byte(password))
+	hashedByte, err := bcrypt.GenerateFromPassword([]byte(password), 16)
 	return string(hashedByte), err
 }
 

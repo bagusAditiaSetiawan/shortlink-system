@@ -6,5 +6,6 @@ import (
 )
 
 func SetupAuthRoute(route fiber.Router, authHandler handler.AuthHandler) {
-	route.Post("/auth/signup", authHandler.Signup)
+	route.Post("/auth/signup", authHandler.SignUp)
+	route.Post("/auth/signin", authHandler.SignIn)
 }

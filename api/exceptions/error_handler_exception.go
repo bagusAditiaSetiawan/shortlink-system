@@ -9,13 +9,15 @@ import (
 
 func toResponse(ctx *fiber.Ctx, statusCode int, data interface{}) error {
 	return ctx.Status(statusCode).JSON(&fiber.Map{
-		"data": data,
+		"errors": data,
 	})
 }
 
 func ErrorHandlerException(ctx *fiber.Ctx, err error) error {
+	errorMessages := []string{}
 	if errNotFound := ErrorNotFoundHandler(err); errNotFound != nil {
-		return toResponse(ctx, http.StatusNotFound, err.Error())
+		errorMessages = append(errorMessages, err.Error())
+		return toResponse(ctx, http.StatusNotFound, errorMessages)
 	}
 
 	if errValidation := ErrorValidator(err); errValidation != nil {
@@ -24,7 +26,12 @@ func ErrorHandlerException(ctx *fiber.Ctx, err error) error {
 	}
 
 	if errBadRequestException := BadRequestExceptionHandler(err); errBadRequestException != nil {
-		return toResponse(ctx, http.StatusBadRequest, err.Error())
+		errorMessages = append(errorMessages, err.Error())
+		return toResponse(ctx, http.StatusBadRequest, errorMessages)
+	}
+	if errUnauthorizedException := UnauthorizedExceptionHandler(err); errUnauthorizedException != nil {
+		errorMessages = append(errorMessages, err.Error())
+		return toResponse(ctx, http.StatusBadRequest, errorMessages)
 	}
 
 	code := fiber.StatusInternalServerError
@@ -33,7 +40,8 @@ func ErrorHandlerException(ctx *fiber.Ctx, err error) error {
 		code = e.Code
 	}
 	if err != nil {
-		return toResponse(ctx, code, err.Error())
+		errorMessages = append(errorMessages, err.Error())
+		return toResponse(ctx, code, errorMessages)
 	}
 
 	return nil
@@ -58,6 +66,14 @@ func ErrorNotFoundHandler(err error) error {
 }
 func BadRequestExceptionHandler(err error) error {
 	exception, ok := err.(BadRequestException)
+	if ok {
+		return exception
+	} else {
+		return nil
+	}
+}
+func UnauthorizedExceptionHandler(err error) error {
+	exception, ok := err.(UnauthorizedRequestException)
 	if ok {
 		return exception
 	} else {
