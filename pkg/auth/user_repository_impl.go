@@ -21,3 +21,19 @@ func (r *UserRepositoryImpl) GetExisted(tx *gorm.DB, email string, username stri
 	result := tx.Where("email = ?", email).Or("username = ?", username).First(&user)
 	return user, result.Error
 }
+
+func (r *UserRepositoryImpl) PaginateUser(db *gorm.DB, req *PaginateUser) ([]entities.User, int) {
+	users := []entities.User{}
+	var count int64
+	query := db.Model(&entities.User{})
+	if req.Username != "" {
+		query.Where("username LIKE ?", "%"+req.Username+"%")
+	}
+	if req.Email != "" {
+		query.Where("email LIKE ?", "%"+req.Email+"%")
+	}
+	query.Count(&count)
+	query.Offset(req.GetOffset()).Limit(req.Limit)
+	query.Find(&users)
+	return users, int(count)
+}

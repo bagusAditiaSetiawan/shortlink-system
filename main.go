@@ -35,13 +35,13 @@ func main() {
 func InitializedService(app *fiber.App, validate *validator.Validate, db *gorm.DB) {
 	userService := auth.InitializedAuthService(db, validate)
 	grouped := routes.SetupRouteApi(app)
+	protectedMiddleware := middleware.Protected()
 
 	jwtService := jwt.InitializedJwt()
 	authHandler := handler.NewAuthHandler(userService, jwtService)
 
-	routes.SetupAuthRoute(grouped, authHandler)
+	routes.SetupAuthRoute(grouped, protectedMiddleware, authHandler)
 
-	protectedMiddleware := middleware.Protected()
 	userLoggedService := auth.NewUserLoggedService()
 	profileHandler := handler.NewProfileHandlerImpl(userLoggedService)
 	routes.SetupProfileRoute(grouped, protectedMiddleware, profileHandler)

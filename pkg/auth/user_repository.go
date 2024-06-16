@@ -8,4 +8,5 @@ import (
 type UserRepository interface {
 	Create(tx *gorm.DB, user entities.User) (entities.User, error)
 	GetExisted(tx *gorm.DB, email string, username string) (entities.User, error)
+	PaginateUser(db *gorm.DB, req *PaginateUser) ([]entities.User, int)
 }

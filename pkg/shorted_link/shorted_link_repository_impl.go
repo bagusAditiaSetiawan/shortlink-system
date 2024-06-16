@@ -52,3 +52,18 @@ func (repository *ShortedLinkRepositoryImpl) Update(db *gorm.DB, req entities.Sh
 	db.Save(&req)
 	return req
 }
+
+func (repository *ShortedLinkRepositoryImpl) PaginateShortLink(db *gorm.DB, req *PaginateShortedLink) ([]entities.ShortedLink, int) {
+	shortedLinks := make([]entities.ShortedLink, 0)
+	var total int64
+	query := db.Model(&entities.ShortedLink{})
+
+	if len(req.Url) > 0 {
+		query = query.Where("link_original LIKE ?", "%"+req.Url+"%")
+	}
+	query.Count(&total)
+	query.Offset(req.GetOffset()).Limit(req.GetLimit())
+	query.Find(&shortedLinks)
+
+	return shortedLinks, int(total)
+}

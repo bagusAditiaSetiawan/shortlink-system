@@ -43,3 +43,15 @@ func (handler *ShortedLinkHandlerImpl) RedirectLink(ctx *fiber.Ctx) error {
 	handler.ShortedLinkService.UpdateAccessed(link)
 	return ctx.Redirect(originalLink, 301)
 }
+
+func (handler *ShortedLinkHandlerImpl) PaginateLink(ctx *fiber.Ctx) error {
+	req := new(shorted_link.PaginateShortedLink)
+	if err := ctx.BodyParser(req); err != nil {
+		panic(exception.NewBadRequestException(languages.MALFORMED))
+	}
+	shortedLinks, total := handler.ShortedLinkService.PaginateShortLink(req)
+	return ctx.JSON(helper.ToWebResponse(fiber.Map{
+		"list":  shortedLinks,
+		"total": total,
+	}))
+}

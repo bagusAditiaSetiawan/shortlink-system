@@ -10,4 +10,5 @@ type ShortLinkService interface {
 	GetExistOriginalLink(generatedLink string) (string, error)
 	SaveToRedis(link entities.ShortedLink)
 	UpdateAccessed(link string) entities.ShortedLink
+	PaginateShortLink(req *PaginateShortedLink) ([]entities.ShortedLink, int)
 }

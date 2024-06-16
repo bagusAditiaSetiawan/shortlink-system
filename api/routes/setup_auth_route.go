@@ -5,7 +5,7 @@ import (
 	"shortlink-system/api/handler"
 )
 
-func SetupAuthRoute(route fiber.Router, authHandler handler.AuthHandler) {
+func SetupAuthRoute(route fiber.Router, protectedMiddleware fiber.Handler, authHandler handler.AuthHandler) {
 	route.Post("/auth/signup", authHandler.SignUp)
 	route.Post("/auth/signin", authHandler.SignIn)
 }

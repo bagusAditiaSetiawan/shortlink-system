@@ -7,4 +7,5 @@ import (
 
 func SetupShortedLinkRoute(route fiber.Router, protected fiber.Handler, handler handler.ShortedLinkHandler) {
 	route.Post("/shorted-link", protected, handler.CreateShortedLink)
+	route.Post("/shorted-link/list", protected, handler.PaginateLink)
 }
