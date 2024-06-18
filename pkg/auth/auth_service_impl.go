@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 	exception "shortlink-system/api/exceptions"
+	"shortlink-system/pkg/aws_cloudwatch"
 	"shortlink-system/pkg/entities"
 	"shortlink-system/pkg/helper"
 	"shortlink-system/pkg/languages"
@@ -15,14 +16,16 @@ type ServiceImpl struct {
 	Validator       *validator.Validate
 	UserRepository  UserRepository
 	PasswordService password.Service
+	Logger          aws_cloudwatch.AwsCloudWatchService
 }
 
-func NewServiceImpl(db *gorm.DB, validate *validator.Validate, userRepository UserRepository, passwordService password.Service) *ServiceImpl {
+func NewServiceImpl(db *gorm.DB, validate *validator.Validate, userRepository UserRepository, passwordService password.Service, logger aws_cloudwatch.AwsCloudWatchService) *ServiceImpl {
 	return &ServiceImpl{
 		DB:              db,
 		UserRepository:  userRepository,
 		Validator:       validate,
 		PasswordService: passwordService,
+		Logger:          logger,
 	}
 }
 
@@ -31,7 +34,10 @@ func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
 	helper.IfErrorHandler(err)
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
+	service.Logger.SendLogInfo("Get existed user")
 	_, err = service.UserRepository.GetExisted(tx, req.Email, req.Username)
+	service.Logger.SendLogInfo("Result get existed", err)
+
 	if err == nil {
 		panic(exception.NewBadRequestException(languages.USER_EXIST))
 	}
@@ -44,7 +50,10 @@ func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
 		Password: hashedPassword,
 		Email:    req.Email,
 	}
+	service.Logger.SendLogInfo("Create user repository")
 	user, err = service.UserRepository.Create(tx, user)
+
+	service.Logger.SendLogInfo("Result error create", err)
 
 	helper.IfErrorHandler(err)
 	return SignUpSignature{

@@ -4,6 +4,7 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"os"
+	exception "shortlink-system/api/exceptions"
 	"shortlink-system/pkg/languages"
 )
 
@@ -17,15 +18,7 @@ func Protected() fiber.Handler {
 
 func jwtError(c *fiber.Ctx, err error) error {
 	if err.Error() == "Missing or malformed JWT" {
-		return c.Status(fiber.StatusBadRequest).
-			JSON(fiber.Map{
-				"errors": []string{
-					languages.MALFORMED_JWT,
-				},
-			})
+		panic(exception.NewUnauthorizedRequestException(languages.MALFORMED_JWT))
 	}
-	return c.Status(fiber.StatusUnauthorized).
-		JSON(fiber.Map{"errors": []string{
-			languages.EXPIRED_JWT,
-		}})
+	panic(exception.NewUnauthorizedRequestException(languages.EXPIRED_JWT))
 }

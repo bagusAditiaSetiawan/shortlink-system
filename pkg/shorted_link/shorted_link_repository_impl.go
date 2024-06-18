@@ -56,9 +56,9 @@ func (repository *ShortedLinkRepositoryImpl) Update(db *gorm.DB, req entities.Sh
 func (repository *ShortedLinkRepositoryImpl) PaginateShortLink(db *gorm.DB, req *PaginateShortedLink) ([]entities.ShortedLink, int) {
 	shortedLinks := make([]entities.ShortedLink, 0)
 	var total int64
-	query := db.Model(&entities.ShortedLink{})
+	query := db.Model(&entities.ShortedLink{}).Preload("User")
 
-	if len(req.Url) > 0 {
+	if req.Url != "" {
 		query = query.Where("link_original LIKE ?", "%"+req.Url+"%")
 	}
 	query.Count(&total)

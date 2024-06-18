@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	exception "shortlink-system/api/exceptions"
+	"shortlink-system/api/presenter"
 	"shortlink-system/pkg/auth"
 	"shortlink-system/pkg/helper"
 	"shortlink-system/pkg/languages"
@@ -50,8 +51,5 @@ func (handler *ShortedLinkHandlerImpl) PaginateLink(ctx *fiber.Ctx) error {
 		panic(exception.NewBadRequestException(languages.MALFORMED))
 	}
 	shortedLinks, total := handler.ShortedLinkService.PaginateShortLink(req)
-	return ctx.JSON(helper.ToWebResponse(fiber.Map{
-		"list":  shortedLinks,
-		"total": total,
-	}))
+	return ctx.JSON(helper.ToWebResponse(presenter.ToShortedLinkResponse(shortedLinks, total)))
 }

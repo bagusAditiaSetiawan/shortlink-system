@@ -13,6 +13,8 @@ import (
 	"shortlink-system/api/middleware"
 	"shortlink-system/api/routes"
 	"shortlink-system/pkg/auth"
+	"shortlink-system/pkg/aws"
+	"shortlink-system/pkg/aws_cloudwatch"
 	"shortlink-system/pkg/database"
 	"shortlink-system/pkg/generator"
 	"shortlink-system/pkg/helper"
@@ -36,6 +38,10 @@ func InitializedService(app *fiber.App, validate *validator.Validate, db *gorm.D
 	userService := auth.InitializedAuthService(db, validate)
 	grouped := routes.SetupRouteApi(app)
 	protectedMiddleware := middleware.Protected()
+
+	awsSes := aws.NewAwsSessionService()
+	awsWatch := aws_cloudwatch.NewCloudWatchLogsService(awsSes)
+	cloudwatchLogs := aws_cloudwatch.NewAwsCloudWatchServiceImpl(awsWatch)
 
 	jwtService := jwt.InitializedJwt()
 	authHandler := handler.NewAuthHandler(userService, jwtService)

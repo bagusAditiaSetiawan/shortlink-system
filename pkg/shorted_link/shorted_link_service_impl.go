@@ -8,6 +8,7 @@ import (
 	"os"
 	exception "shortlink-system/api/exceptions"
 	"shortlink-system/pkg/auth"
+	"shortlink-system/pkg/aws_cloudwatch"
 	"shortlink-system/pkg/entities"
 	"shortlink-system/pkg/generator"
 	"shortlink-system/pkg/helper"
@@ -24,9 +25,12 @@ type ShortLinkServiceImpl struct {
 	ShortLinkRepository ShortedLinkRepository
 	ShortLinkGenerator  generator.Service
 	MaxMonthly          int
+	Logger              aws_cloudwatch.AwsCloudWatchService
 }
 
-func New(db *gorm.DB, validate *validator.Validate, redis redis.RedisService, repository ShortedLinkRepository, service generator.Service, max int) *ShortLinkServiceImpl {
+func New(db *gorm.DB, validate *validator.Validate, redis redis.RedisService,
+	repository ShortedLinkRepository, service generator.Service,
+	max int, logger aws_cloudwatch.AwsCloudWatchService) *ShortLinkServiceImpl {
 	return &ShortLinkServiceImpl{
 		DB:                  db,
 		Validate:            validate,
@@ -34,6 +38,7 @@ func New(db *gorm.DB, validate *validator.Validate, redis redis.RedisService, re
 		ShortLinkRepository: repository,
 		ShortLinkGenerator:  service,
 		MaxMonthly:          max,
+		Logger:              logger,
 	}
 }
 
