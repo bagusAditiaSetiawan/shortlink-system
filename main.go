@@ -37,7 +37,11 @@ func main() {
 func InitializedService(app *fiber.App, validate *validator.Validate, db *gorm.DB) {
 	awsSes := aws.NewAwsSessionService()
 	awsWatch := aws_cloudwatch.NewCloudWatchLogsService(awsSes)
-	cloudwatchLogs := aws_cloudwatch.NewAwsCloudWatchServiceImpl(awsWatch)
+	isSendLog := false
+	if os.Getenv("AWS_CLOUDWATCH_SEND") == "true" {
+		isSendLog = true
+	}
+	cloudwatchLogs := aws_cloudwatch.NewAwsCloudWatchServiceImpl(awsWatch, isSendLog)
 
 	grouped := routes.SetupRouteApi(app)
 	protectedMiddleware := middleware.Protected()
