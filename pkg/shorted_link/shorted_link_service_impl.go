@@ -43,16 +43,18 @@ func New(db *gorm.DB, validate *validator.Validate, redis redis.RedisService,
 }
 
 func (service *ShortLinkServiceImpl) CreateShortedLink(req *CreateShortedLink, user auth.UserLoggedPayload) entities.ShortedLink {
+	service.Logger.SendLogInfo("Process create shorted link")
 	err := service.Validate.Struct(req)
 	helper.IfErrorHandler(err)
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
-
+	go service.Logger.SendLogInfo("Process summaries monthly user")
 	SumLinkOfUser := service.ShortLinkRepository.SumMonthlyUser(tx, int(user.ID))
 	if SumLinkOfUser > service.MaxMonthly-1 {
 		panic(exception.NewBadRequestException(languages.MAX_USER_MONTHLY + "_" + strconv.Itoa(service.MaxMonthly)))
 	}
 	shortedLink := service.GenerateShortLink(tx)
+	service.Logger.SendLogInfo("Process summaries monthly user")
 	dataShortedLink := service.ShortLinkRepository.Create(tx, entities.ShortedLink{
 		LinkShortedFull: fmt.Sprintf("%s/%s", os.Getenv("BASE_URL"), shortedLink),
 		LinkShorted:     shortedLink,
@@ -88,9 +90,11 @@ func (service *ShortLinkServiceImpl) GetExistOriginalLink(generatedLink string) 
 }
 
 func (service *ShortLinkServiceImpl) UpdateAccessed(link string) entities.ShortedLink {
+	go service.Logger.SendLogInfo("Process updated accessed link")
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
 	shortedLink, err := service.ShortLinkRepository.FindByShortedLinkWithLock(tx, link)
+	go service.Logger.SendLogInfo("Result find shorted link by link", err)
 	if err != nil {
 		return shortedLink
 	}

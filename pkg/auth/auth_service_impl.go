@@ -34,9 +34,9 @@ func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
 	helper.IfErrorHandler(err)
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
-	service.Logger.SendLogInfo("Get existed user")
+	go service.Logger.SendLogInfo("Get existed user")
 	_, err = service.UserRepository.GetExisted(tx, req.Email, req.Username)
-	service.Logger.SendLogInfo("Result get existed", err)
+	go service.Logger.SendLogInfo("Result get existed", err)
 
 	if err == nil {
 		panic(exception.NewBadRequestException(languages.USER_EXIST))
@@ -50,10 +50,10 @@ func (service *ServiceImpl) SignUp(req *SignUpRequest) SignUpSignature {
 		Password: hashedPassword,
 		Email:    req.Email,
 	}
-	service.Logger.SendLogInfo("Create user repository")
+	go service.Logger.SendLogInfo("Create user repository")
 	user, err = service.UserRepository.Create(tx, user)
 
-	service.Logger.SendLogInfo("Result error create", err)
+	go service.Logger.SendLogInfo("Result error create", err)
 
 	helper.IfErrorHandler(err)
 	return SignUpSignature{
