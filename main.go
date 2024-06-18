@@ -35,14 +35,14 @@ func main() {
 }
 
 func InitializedService(app *fiber.App, validate *validator.Validate, db *gorm.DB) {
-	userService := auth.InitializedAuthService(db, validate)
-	grouped := routes.SetupRouteApi(app)
-	protectedMiddleware := middleware.Protected()
-
 	awsSes := aws.NewAwsSessionService()
 	awsWatch := aws_cloudwatch.NewCloudWatchLogsService(awsSes)
 	cloudwatchLogs := aws_cloudwatch.NewAwsCloudWatchServiceImpl(awsWatch)
 
+	grouped := routes.SetupRouteApi(app)
+	protectedMiddleware := middleware.Protected()
+
+	userService := auth.InitializedAuthService(db, validate, cloudwatchLogs)
 	jwtService := jwt.InitializedJwt()
 	authHandler := handler.NewAuthHandler(userService, jwtService)
 
@@ -59,7 +59,7 @@ func InitializedService(app *fiber.App, validate *validator.Validate, db *gorm.D
 	redisService := redis.NewRedisServiceImpl(redisAddr, redisPassword, redisNumberDB)
 	generatorService := generator.NewShortService()
 
-	shortedLinkService := shorted_link.InitializedShortedLinkService(db, validate, redisService, generatorService)
+	shortedLinkService := shorted_link.InitializedShortedLinkService(db, validate, cloudwatchLogs, redisService, generatorService)
 	shortedLinkHandler := handler.NewShortedLinkHandlerImpl(userLoggedService, shortedLinkService)
 	app.Get("/:link", shortedLinkHandler.RedirectLink)
 	routes.SetupShortedLinkRoute(grouped, protectedMiddleware, shortedLinkHandler)
