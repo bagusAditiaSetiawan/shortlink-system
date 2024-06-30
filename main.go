@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
@@ -73,6 +74,9 @@ func initializedApp() *fiber.App {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: exception.ErrorHandlerException,
 	})
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: os.Getenv("CORS_ALLOW_ORIGINS"),
+	}))
 	app.Use(recover.New())
 	return app
 }
