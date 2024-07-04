@@ -24,7 +24,7 @@ services:
       - AWS_CLOUDWATCH_STREAM=${AWS_CLOUDWATCH_STREAM}
       - AWS_CLOUDWATCH_SEND=${AWS_CLOUDWATCH_SEND}
     ports:
-      - "8000:8000"
+      - "${PORT}:8000"
     networks:
       - mynetwork
 

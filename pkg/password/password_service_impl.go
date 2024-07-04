@@ -9,7 +9,7 @@ func NewPasswordService() *PasswordServiceImpl {
 }
 
 func (s *PasswordServiceImpl) Hashing(password string) (string, error) {
-	hashedByte, err := bcrypt.GenerateFromPassword([]byte(password), 16)
+	hashedByte, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(hashedByte), err
 }
 

@@ -31,7 +31,7 @@ func ErrorHandlerException(ctx *fiber.Ctx, err error) error {
 	}
 	if errUnauthorizedException := UnauthorizedExceptionHandler(err); errUnauthorizedException != nil {
 		errorMessages = append(errorMessages, err.Error())
-		return toResponse(ctx, http.StatusBadRequest, errorMessages)
+		return toResponse(ctx, http.StatusForbidden, errorMessages)
 	}
 
 	code := fiber.StatusInternalServerError
