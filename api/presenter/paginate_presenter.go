@@ -1,8 +1,10 @@
 package presenter
 
 type PaginatePresenter struct {
-	Limit int `json:"limit" form:"limit" validate:"required"`
-	Page  int `json:"page" form:"page" validate:"required"`
+	Limit      int    `json:"limit" form:"limit" validate:"required"`
+	Page       int    `json:"page" form:"page" validate:"required"`
+	OrderBy    string `json:"order_by" form:"order_by"`
+	OrderValue string `json:"order_value" form:"order_value"`
 }
 
 func (presenter *PaginatePresenter) GetLimit() int {

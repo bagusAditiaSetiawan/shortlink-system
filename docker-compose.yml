@@ -1,0 +1,33 @@
+version: '3'
+services:
+  shortlink-system:
+    build:
+      context: .
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - MAX_MONTHLY_USER=${MAX_MONTHLY_USER}
+      - TOKEN_KEY=${TOKEN_KEY}
+      - TOKEN_EXPIRE=${TOKEN_EXPIRE}
+      - REDIS_ADDR=${REDIS_ADDR}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - BASE_URL=${BASE_URL}
+      - AWS_KEY=${AWS_KEY}
+      - AWS_SECRET=${AWS_SECRET}
+      - AWS_S3_REGION=${AWS_S3_REGION}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_CLOUDWATCH_GROUP=${AWS_CLOUDWATCH_GROUP}
+      - AWS_CLOUDWATCH_STREAM=${AWS_CLOUDWATCH_STREAM}
+      - AWS_CLOUDWATCH_SEND=${AWS_CLOUDWATCH_SEND}
+    ports:
+      - "8000:8000"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

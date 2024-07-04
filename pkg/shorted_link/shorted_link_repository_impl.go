@@ -1,11 +1,22 @@
 package shorted_link
 
 import (
+	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"shortlink-system/pkg/entities"
 	"time"
 )
+
+var ShortedOrderBy = fiber.Map{
+	"link_original": "link_original",
+}
+
+var ShortedOrderValue = fiber.Map{
+	"asc":  "asc",
+	"desc": "desc",
+}
 
 type ShortedLinkRepositoryImpl struct {
 }
@@ -62,7 +73,13 @@ func (repository *ShortedLinkRepositoryImpl) PaginateShortLink(db *gorm.DB, req 
 		query = query.Where("link_original LIKE ?", "%"+req.Url+"%")
 	}
 	query.Count(&total)
-	query.Offset(req.GetOffset()).Limit(req.GetLimit())
+
+	if ShortedOrderBy[req.OrderBy] == nil && ShortedOrderValue[req.OrderValue] == nil {
+		req.OrderValue = "desc"
+		req.OrderBy = "id"
+	}
+
+	query.Offset(req.GetOffset()).Limit(req.GetLimit()).Order(fmt.Sprintf("%s %s", req.OrderBy, req.OrderValue))
 	query.Find(&shortedLinks)
 
 	return shortedLinks, int(total)
