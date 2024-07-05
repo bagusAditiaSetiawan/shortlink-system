@@ -72,6 +72,10 @@ func (repository *ShortedLinkRepositoryImpl) PaginateShortLink(db *gorm.DB, req 
 	if req.Url != "" {
 		query = query.Where("link_original LIKE ?", "%"+req.Url+"%")
 	}
+	if req.UserID > 0 {
+		query = query.Where("user_id = ?", req.UserID)
+	}
+
 	query.Count(&total)
 
 	if ShortedOrderBy[req.OrderBy] == nil && ShortedOrderValue[req.OrderValue] == nil {

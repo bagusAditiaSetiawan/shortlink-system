@@ -106,7 +106,6 @@ func (service *ShortLinkServiceImpl) UpdateAccessed(link string) entities.Shorte
 func (service *ShortLinkServiceImpl) PaginateShortLink(req *PaginateShortedLink) ([]entities.ShortedLink, int) {
 	tx := service.DB.Begin()
 	defer helper.RollbackOrCommitDb(tx)
-
 	shortedLinks, page := service.ShortLinkRepository.PaginateShortLink(tx, req)
 	return shortedLinks, page
 }

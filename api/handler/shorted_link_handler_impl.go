@@ -50,6 +50,8 @@ func (handler *ShortedLinkHandlerImpl) PaginateLink(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(req); err != nil {
 		panic(exception.NewBadRequestException(languages.MALFORMED))
 	}
+	user := handler.UserLoggedService.GetUserLoggedPayload(ctx)
+	req.UserID = user.ID
 	shortedLinks, total := handler.ShortedLinkService.PaginateShortLink(req)
 	return ctx.JSON(helper.ToWebResponse(presenter.ToShortedLinkResponse(shortedLinks, total)))
 }
